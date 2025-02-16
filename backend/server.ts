@@ -2,7 +2,8 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import authRouter from "./routes/authRoutes";
-
+import quizRouter from "./routes/quizRoutes";
+import { connectDb } from "./database";
 dotenv.config({ path: "../.env" });
 
 const app = express();
@@ -16,6 +17,9 @@ app.use(
 );
 
 app.use("/api/auth", authRouter);
+app.use("/api/quiz", quizRouter);
+
+connectDb();
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {

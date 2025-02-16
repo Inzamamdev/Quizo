@@ -2,7 +2,7 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./components/app-sidebar";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import react, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const [userName, setUserName] = useState("");
@@ -29,7 +29,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <SidebarProvider>
       <AppSidebar userName={userName} handleSignOut={handleSignOut} />
-      <main>
+      <main className="h-full w-full">
         <SidebarTrigger />
         {children}
       </main>
