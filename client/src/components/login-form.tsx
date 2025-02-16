@@ -97,9 +97,9 @@ export function LoginForm({
               <div>
                 {error &&
                   error?.map((err, index) => (
-                    <li key={index} className="text-red-500">
+                    <p key={index} className="text-red-500">
                       {err}
-                    </li>
+                    </p>
                   ))}
               </div>
               <Button type="submit" className="w-full">

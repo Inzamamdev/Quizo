@@ -3,11 +3,13 @@ import { useNavigate } from "react-router-dom";
 import Layout from "@/layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Dashboard() {
   const [quizzes, setQuizzes] = useState<
     { id: number; title: string; description: string; created_at: string }[]
   >([]);
+  const { toast } = useToast();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -30,28 +32,29 @@ export default function Dashboard() {
     }
   };
 
-  // const handleDelete = async (quizId: number) => {
-  //   try {
-  //     const res = await fetch(
-  //       `${import.meta.env.VITE_API_URL}/api/quiz/quizzes/${quizId}`,
-  //       {
-  //         method: "DELETE",
-  //       }
-  //     );
-
-  //     if (res.ok) {
-  //       setQuizzes(quizzes.filter((quiz) => quiz.id !== quizId));
-  //     } else {
-  //       console.error("Failed to delete quiz");
-  //     }
-  //   } catch (error) {
-  //     console.error("Error deleting quiz:", error);
-  //   }
-  // };
+  const handleDelete = async (quizId: number) => {
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/quiz/quizzes/${quizId}`,
+        {
+          method: "DELETE",
+        }
+      );
+      const data = await res.json();
+      if (res.ok) {
+        setQuizzes(quizzes.filter((quiz) => quiz.id !== quizId));
+        toast({ title: data.message });
+      } else {
+        console.error("Failed to delete quiz");
+      }
+    } catch (error) {
+      console.error("Error deleting quiz:", error);
+    }
+  };
 
   return (
     <Layout>
-      <div className="container mx-auto py-10">
+      <div className="container mx-5 py-10">
         <h1 className="text-3xl font-bold mb-6">My Quizzes</h1>
 
         {quizzes.length === 0 ? (
@@ -71,13 +74,13 @@ export default function Dashboard() {
                   <div className="flex justify-between mt-4">
                     <Button
                       variant="outline"
-                      // onClick={() => navigate(`/edit-quiz/${quiz.id}`)}
+                      onClick={() => navigate(`/create/${quiz.id}`)}
                     >
                       Edit
                     </Button>
                     <Button
                       variant="destructive"
-                      // onClick={() => handleDelete(quiz.id)}
+                      onClick={() => handleDelete(quiz.id)}
                     >
                       Delete
                     </Button>
