@@ -9,11 +9,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
   const { toast } = useToast();
   const fetchUser = () => {
-    const user = localStorage.getItem("user");
+    const user = JSON.parse(localStorage.getItem("user") || "{}");
     if (!user) {
       navigate("/");
     } else {
-      setUserName(user);
+      setUserName(user.username);
     }
   };
 

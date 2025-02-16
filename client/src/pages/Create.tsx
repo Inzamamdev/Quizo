@@ -3,13 +3,20 @@ import { useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+
 import Layout from "@/layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useToast } from "@/hooks/use-toast";
 
 export default function CreateQuiz() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [error, setError] = useState([]);
   const navigate = useNavigate();
+  const { toast } = useToast();
+
+  const teacher = JSON.parse(localStorage.getItem("user") || "{}");
+  const teacher_id = teacher?.id;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -20,14 +27,15 @@ export default function CreateQuiz() {
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ title, description }),
+          body: JSON.stringify({ title, description, teacher_id }),
         }
       );
-
+      const data = await res.json();
       if (res.ok) {
+        toast({ title: data.message });
         navigate("/dashboard");
       } else {
-        alert("Error creating quiz!");
+        setError(data.errors);
       }
     } catch (error) {
       console.error(error);
@@ -49,14 +57,20 @@ export default function CreateQuiz() {
                 placeholder="Quiz Title"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                required
               />
               <Textarea
                 placeholder="Quiz Description"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                required
               />
+              <div>
+                {error &&
+                  error?.map((err, index) => (
+                    <p key={index} className="text-red-500">
+                      {err}
+                    </p>
+                  ))}
+              </div>
               <Button type="submit" className="w-full">
                 Create Quiz
               </Button>

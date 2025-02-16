@@ -42,14 +42,13 @@ export function LoginForm({
           body: JSON.stringify(formData),
         }
       );
-
+      const data = await response.json();
       if (!response.ok) {
-        const errorData = await response.json();
-        setError(errorData.errors);
+        setError(Array.isArray(data.errors) ? data.errors : [data.error]); // ✅ Ensure error is an array
+        return;
       }
 
-      const data = await response.json();
-      localStorage.setItem("user", data.username);
+      localStorage.setItem("user", JSON.stringify(data.user));
       toast({ title: data.message });
       navigate("/dashboard");
     } catch (error) {
