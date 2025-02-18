@@ -15,8 +15,25 @@ const pool = new Pool({
 // Function to connect to the database
 export const connectDb = async () => {
   try {
-    await pool.connect();
+    const client = await pool.connect();
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS quizzes (
+        id SERIAL PRIMARY KEY,
+        title VARCHAR(255) NOT NULL,
+        description TEXT,
+        teacher_id INT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+
+      CREATE TABLE IF NOT EXISTS users (
+        id SERIAL PRIMARY KEY,
+        name VARCHAR(255) NOT NULL,
+        email VARCHAR(255) UNIQUE NOT NULL,
+        password TEXT NOT NULL
+      );
+    `);
     console.log("PostgreSQL database connected");
+    console.log("✅ Tables checked/created");
   } catch (err) {
     console.error("Failed to connect to PostgreSQL", err);
     process.exit(1);
