@@ -30,6 +30,15 @@ export const connectDb = async () => {
         username VARCHAR(255) NOT NULL,
         password TEXT NOT NULL
       );
+
+     INSERT INTO users (username, password)
+SELECT 'admin123', 'admin123'
+WHERE NOT EXISTS (
+    SELECT 1 FROM users WHERE username = 'admin123'
+);
+     
+
+
     `);
     console.log("PostgreSQL database connected");
     console.log("✅ Tables checked/created");
