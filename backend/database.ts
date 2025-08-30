@@ -1,49 +1,51 @@
 import dotenv from "dotenv";
 dotenv.config({ path: "../.env" });
 
-import pkg from "pg";
-const { Pool } = pkg;
+import sqlite3 from "sqlite3";
+import { promisify } from "util";
 
-const pool = new Pool({
-  user: process.env.POSTGRES_USER,
-  host: process.env.POSTGRES_HOST,
-  port: Number(process.env.POSTGRES_PORT),
-  database: process.env.POSTGRES_DB,
-  password: process.env.POSTGRES_PASSWORD,
-});
+// Create SQLite database
+const db = new sqlite3.Database('./quizo.db');
+
+// Promisify database methods for async/await
+const dbRun = promisify(db.run.bind(db));
+const dbGet = promisify(db.get.bind(db));
+const dbAll = promisify(db.all.bind(db));
 
 // Function to connect to the database
 export const connectDb = async () => {
   try {
-    const client = await pool.connect();
-    await client.query(`
+    await dbRun(`
       CREATE TABLE IF NOT EXISTS quizzes (
-        id SERIAL PRIMARY KEY,
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
         title VARCHAR(255) NOT NULL,
         description TEXT,
-        teacher_id INT,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      );
+        teacher_id INTEGER,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
 
+    await dbRun(`
       CREATE TABLE IF NOT EXISTS users (
-        id SERIAL PRIMARY KEY,
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
         username VARCHAR(255) NOT NULL,
         password TEXT NOT NULL
-      );
-
-     INSERT INTO users (username, password)
-SELECT 'admin123', 'admin123'
-WHERE NOT EXISTS (
-    SELECT 1 FROM users WHERE username = 'admin123'
-);
-     
-
-
+      )
     `);
-    console.log("PostgreSQL database connected");
+
+    // Insert default admin user if not exists
+    const existingUser = await dbGet("SELECT * FROM users WHERE username = 'admin123'");
+    if (!existingUser) {
+      await dbRun("INSERT INTO users (username, password) VALUES ('admin123', 'admin123')");
+    }
+
+    console.log("SQLite database connected");
     console.log("✅ Tables checked/created");
   } catch (err) {
-    console.error("Failed to connect to PostgreSQL", err);
+    console.error("Failed to connect to SQLite", err);
     process.exit(1);
   }
 };
+
+// Export database instance and helper functions
+export { db, dbRun, dbGet, dbAll };
